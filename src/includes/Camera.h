@@ -1,6 +1,6 @@
 #ifndef CAMERA_HPP
 #define CAMERA_HPP
-#include "Vector.hpp"
+#include "Vector.h"
 class Camera {
 public:
 	Vector eye, look;

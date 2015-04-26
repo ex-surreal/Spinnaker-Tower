@@ -1,72 +1,96 @@
-#include<stdio.h>
-#include<stdlib.h>
-#include<math.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
 #include <iostream>
 
-#include<GLUT/glut.h>
+#include <GLUT/glut.h>
 using namespace std;
-#include "includes/Camera.hpp"
-#include "includes/Vector.hpp"
+#include "includes/Camera.h"
+#include "includes/Vector.h"
+#include "includes/Color.h"
 
 #define BLACK 0, 0, 0
 #define WHITE 1, 1, 1
 #define RED 1, 0, 0
 #define GREEN 0, 1, 0
 #define BLUE 0, 0, 1
+#define POINT(v) v.x, v.y, v.z
+#define COLOR(v) v.r, v.g, v.b
+const float DEG2RAD = 3.14159/180;
+const double delta = 5;
+const double delAlpha = .05;
+const double pi = acos(-1.0);
 
-const double delta = 3;
-const double delAlpha = .1;
+Camera cam(Vector(300, 0, 150), Vector(0, 0, 150), Vector(0, 0, 1));
 
-Camera cam(Vector(0, 200, 0), Vector(0, 0, 0), Vector(0, 0, 1));
+#include "includes/listeners.h"
+#include "includes/dip.h"
 
-void cameraMoveInPlane(int key) {
-	switch(key) {
-		case GLUT_KEY_DOWN:		//down arrow key
-			cam.slide(0, -delta, 0);
-			break;
-		case GLUT_KEY_UP:		// up arrow key
-			cam.slide(0, delta, 0);
-			break;
-		case GLUT_KEY_RIGHT:
-			cam.slide(delta, 0, 0);
-			break;
-		case GLUT_KEY_LEFT:
-			cam.slide(-delta, 0, 0);
-			break;
-		default:
-			break;
+
+void drawPlane(Vector a, Vector b, Vector c, Vector d, Color cl) {
+	glColor3f(COLOR(cl));
+	glBegin(GL_QUADS); {
+		glVertex3f(POINT(a));
+		glVertex3f(POINT(b));
+		glVertex3f(POINT(c));
+		glVertex3f(POINT(d));
+	} glEnd();
+}
+
+void drawOpenBox(Vector points[8], Color c) {
+	drawPlane(points[0], points[1], points[5], points[4], c*1);
+	drawPlane(points[1], points[2], points[6], points[5], c*.8);
+	drawPlane(points[2], points[3], points[7], points[5], c*.6);
+	drawPlane(points[0], points[3], points[7], points[4], c*.4);
+}
+
+void getPoints(Vector center, double radius, double alpha, double width, double thickness, Vector *points) {	
+	points[0] = Vector(0, radius*cos(alpha), radius*sin(alpha));
+	Vector widthVector = center - points[0];
+	widthVector.normalize();
+	widthVector = widthVector * width;
+	points[3] = points[0] + widthVector;
+	points[1] = points[0] + Vector(thickness, 0, 0);
+	points[2] = points[3] + Vector(thickness, 0, 0);
+}
+
+void debugPoints(Vector points[8]) {
+	for (int i = 0; i < 8; i++) {
+		Color c = Color(BLUE)*((i+1)/8.0);
+		glColor3f(COLOR(c));
+		glPointSize(3.0);
+		glBegin(GL_POINTS); {
+			glVertex3f(POINT(points[i]));
+		} glEnd();
 	}
 }
 
-void cameraRotateAndFB(int key) {
-	switch(key){
-		case 'f':
-			cam.slide(0, 0, -delta);
-			break;
-		case 'b':
-			cam.slide(0, 0, delta);
-			break;
-		case '.':
-			cam.roll(delAlpha);
-			break;
-		case ',':
-			cam.roll(-delAlpha);
-			break;
-		case 'u':
-			cam.pitch(-delAlpha);
-			break;
-		case 'd':
-			cam.pitch(delAlpha);
-			break;
-		case 'r':
-			cam.yaw(delAlpha);
-			break;
-		case 'l':
-			cam.yaw(-delAlpha);
-			break;
-		default:
-			break;
+void drawCircularPiller(Vector center, double radius, double width, double thickness, int sections, int from, int to, Color c) {
+	double del = 2*acos(-1.0)/sections;
+	for (int i = from; i <= to; i++) {
+		double alpha = i*del;
+		double beta = ((i+1)%sections)*del;
+		Vector points[8];
+		getPoints(center, radius, alpha,  width, thickness, points);
+		getPoints(center, radius, beta, width, thickness, points+4);
+		drawOpenBox(points, c);
 	}
+}
+
+void drawTriangularConnector() {
+	Vector a(17, 60, -10);
+	Vector b(15, 62.5, -10);
+	Vector u = Vector(3, 5, 0);
+	u.normalize();
+	Vector c = b + (u*26);
+	Vector d = a + (u*26);
+	double z1 = 60, z2 = 10;
+	Vector f(0, 53, z1);
+	Vector e = f+Vector(2, -2.5, 0);
+	Vector g = f+Vector(0, 0, z2);
+	Vector h = e+Vector(0, 0, z2);
+	Vector points[8] = {a, b, c, d, e, f, g, h};
+	drawOpenBox(points, Color(WHITE));
 }
 
 void display() {
@@ -89,15 +113,19 @@ void display() {
 	/ Add your objects from here
 	****************************/
 	//add objects
-	glColor3f(1.0, 1.0, 1.0);
-	glBegin(GL_LINES); {
-		glVertex3f(100, 0, 0);
-		glVertex3f(-100, 0, 0);
-		glVertex3f(0, -100, 0);
-		glVertex3f(0, 100, 0);
-		glVertex3f(0, 0, 100);
-		glVertex3f(0, 0, -100);
-	} glEnd();
+	drawAxes();
+	drawGrid();
+    drawBase();
+    drawPiller();
+	glPushMatrix(); {
+		glRotatef(pi/DEG2RAD, 0, 0, 1);
+		glRotatef(1.03/DEG2RAD, 0, 0, 1);
+		glTranslatef(0, -140, 160);
+		double val = 2;
+		glTranslatef(-50/val, 30/val, 0);
+		drawCircularPiller(Vector(0, 0, 0), 160, 5, 3.2, 64, -10, 6, Color(1, 0, 0));
+	} glPopMatrix();
+	drawTriangularConnector();
 	//rotate this rectangle around the Z axis	
 	glFlush();
 	//////// ------ NOTE ---- ORDER matters. compare last two spheres!
@@ -110,28 +138,6 @@ void animate() {
 	//MISSING SOMETHING? -- YES: add the following
 	glutPostRedisplay();	//this will call the display AGAIN
 }
-
-void keyboardListener(unsigned char key, int x, int y) {
-	cameraRotateAndFB(key);
-}
-
-void specialKeyListener(int key, int x, int y) {
-	cameraMoveInPlane(key);
-}
-
-void mouseListener(int button, int state, int x, int y){	//x, y is the x-y of the screen (2D)
-	switch(button){
-		case GLUT_LEFT_BUTTON:
-			break;
-		case GLUT_RIGHT_BUTTON:
-			break;
-		case GLUT_MIDDLE_BUTTON:
-			break;
-		default:
-			break;
-	}
-}
-
 
 void init(){
 	//codes for initialization
