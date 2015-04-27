@@ -1,6 +1,12 @@
-#ifndef DIP_H
-#define DIP_H
+#include<stdio.h>
+#include<stdlib.h>
+#include<math.h>
+#include<windows.h>
+#include<GL/glut.h>
 
+
+#define pi 2*acos(0)
+const float DEG2RAD = 3.14159/180;
 GLUquadric* IDquadric=gluNewQuadric() ;
 double cameraHeight;
 double cameraAngle;
@@ -27,157 +33,23 @@ struct point
 	double x,y,z;
 };
 
+
 void drawAxes()
 {
-    if(drawaxes==1)
-    {
-        glColor3f(1.0, 1.0, 1.0);
-        glBegin(GL_LINES);{
-            glVertex3f( 100,0,0);
-            glVertex3f(-100,0,0);
-            glVertex3f(0,-100,0);
-            glVertex3f(0, 100,0);
-            glVertex3f(0,0, 100);
-            glVertex3f(0,0,-100);
-        }glEnd();
-    }
+	if(drawaxes==1)
+	{
+		glColor3f(1.0, 1.0, 1.0);
+		glBegin(GL_LINES);{
+			glVertex3f( 100,0,0);
+			glVertex3f(-100,0,0);
+			glVertex3f(0,-100,0);
+			glVertex3f(0, 100,0);
+			glVertex3f(0,0, 100);
+			glVertex3f(0,0,-100);
+		}glEnd();
+	}
 }
 
-
-void drawGrid()
-{
-    int i;
-    if(drawgrid==1)
-    {
-        glColor3f(0.6, 0.6, 0.6);   //grey
-        glBegin(GL_LINES);{
-            for(i=-8;i<=8;i++){
-
-                if(i==0)
-                    continue;   //SKIP the MAIN axes
-
-                //lines parallel to Y-axis
-                glVertex3f(i*10, -90, 0);
-                glVertex3f(i*10,  90, 0);
-
-                //lines parallel to X-axis
-                glVertex3f(-90, i*10, 0);
-                glVertex3f( 90, i*10, 0);
-            }
-        }glEnd();
-    }
-}
-
-
-void drawSquare(float a)
-{
-    glBegin(GL_QUADS);{
-        glVertex3f( a, a,0);
-        glVertex3f( a,-a,0);
-        glVertex3f(-a,-a,0);
-        glVertex3f(-a, a,0);
-    }glEnd();
-}
-
-
-void drawss()
-{
-    glPushMatrix();{
-        glRotatef(angle,0,0,1);
-        glTranslatef(75,0,0);
-        glRotatef(2*angle,0,0,1);
-
-
-        glPushMatrix();{
-            glRotatef(angle,0,0,1);
-            glTranslatef(25,0,0);
-            glRotatef(3*angle,0,0,1);
-            glColor3f(0.0, 0.0, 1.0);
-            drawSquare(5);
-
-        }glPopMatrix();
-
-
-
-        glColor3f(1.0, 0.0, 0.0);
-        drawSquare(10.0);
-    }glPopMatrix();
-
-}
-
-//draws half sphere
-//draws half sphere
-void drawsphere(float radius,int slices,int stacks)
-{
-    struct point points[100][100];
-    int i,j;
-    double h,r;
-    for(i=0;i<=stacks;i++)
-    {
-        h=radius*sin(((double)i/(double)stacks)*(pi/2));
-        r=sqrt(radius*radius-h*h);
-        for(j=0;j<=slices;j++)
-        {
-            points[i][j].x=r*cos(((double)j/(double)slices)*2*pi);
-            points[i][j].y=r*sin(((double)j/(double)slices)*2*pi);
-            points[i][j].z=h;
-        }
-
-    }
-    for(i=0;i<stacks;i++)
-    {
-        for(j=0;j<slices;j++)
-        {
-            glColor3f((double)i/(double)stacks,(double)i/(double)stacks,(double)i/(double)stacks);
-            glBegin(GL_QUADS);{
-                glVertex3f(points[i][j].x,points[i][j].y,points[i][j].z);
-                glVertex3f(points[i][j+1].x,points[i][j+1].y,points[i][j+1].z);
-                glVertex3f(points[i+1][j+1].x,points[i+1][j+1].y,points[i+1][j+1].z);
-                glVertex3f(points[i+1][j].x,points[i+1][j].y,points[i+1][j].z);
-
-            }glEnd();
-        }
-
-    }
-}
-
-void drawCylindar(float radius,int slices,int stacks)
-{
-    struct point points[100][100];
-    int i,j;
-    double h,r;
-    double factor=1;
-
-    for(i=0;i<=stacks;i++)
-    {
-        h=radius*sin(((double)i/(double)stacks)*(pi/2));
-        //r=sqrt(radius*radius-h*h);
-        r= radius*factor;
-        for(j=0;j<=slices;j++)
-        {
-            points[i][j].x=r*cos(((double)j/(double)slices)*2*pi);
-            points[i][j].y=r*sin(((double)j/(double)slices)*2*pi);
-            //points[i][j].y=radius;
-            points[i][j].z=h;
-        }
-       // factor-=.02;
-    }
-    for(i=0;i<stacks;i++)
-    {
-        for(j=0;j<slices;j++)
-        {
-            glColor3f((double)i/(double)stacks,(double)i/(double)stacks,(double)i/(double)stacks);
-            glBegin(GL_QUADS);{
-                glVertex3f(points[i][j].x,points[i][j].y,points[i][j].z);
-                glVertex3f(points[i][j+1].x,points[i][j+1].y,points[i][j+1].z);
-                glVertex3f(points[i+1][j+1].x,points[i+1][j+1].y,points[i+1][j+1].z);
-                glVertex3f(points[i+1][j].x,points[i+1][j].y,points[i+1][j].z);
-
-            }glEnd();
-        }
-
-    }
-}
 
 void renderCylinder(float x1, float y1, float z1, float x2,float y2, float z2, float radius,int subdivisions,GLUquadricObj *quadric)
 {
@@ -221,6 +93,227 @@ void renderCylinder_convenient(float x1, float y1, float z1, float x2,float y2, 
     renderCylinder(x1,y1,z1,x2,y2,z2,radius,subdivisions,quadric);
     gluDeleteQuadric(quadric);
 }
+
+
+void drawGrid()
+{
+	int i;
+	if(drawgrid==1)
+	{
+		glColor3f(0.6, 0.6, 0.6);	//grey
+		glBegin(GL_LINES);{
+			for(i=-8;i<=8;i++){
+
+				if(i==0)
+					continue;	//SKIP the MAIN axes
+
+				//lines parallel to Y-axis
+				glVertex3f(i*10, -90, 0);
+				glVertex3f(i*10,  90, 0);
+
+				//lines parallel to X-axis
+				glVertex3f(-90, i*10, 0);
+				glVertex3f( 90, i*10, 0);
+			}
+		}glEnd();
+	}
+}
+
+
+void drawSquare(float a)
+{
+	glBegin(GL_QUADS);{
+		glVertex3f( a, a,0);
+		glVertex3f( a,-a,0);
+		glVertex3f(-a,-a,0);
+		glVertex3f(-a, a,0);
+	}glEnd();
+}
+
+
+void drawss()
+{
+	glPushMatrix();{
+		glRotatef(angle,0,0,1);
+		glTranslatef(75,0,0);
+		glRotatef(2*angle,0,0,1);
+
+
+		glPushMatrix();{
+			glRotatef(angle,0,0,1);
+			glTranslatef(25,0,0);
+			glRotatef(3*angle,0,0,1);
+			glColor3f(0.0, 0.0, 1.0);
+			drawSquare(5);
+
+		}glPopMatrix();
+
+
+
+		glColor3f(1.0, 0.0, 0.0);
+		drawSquare(10.0);
+	}glPopMatrix();
+
+}
+
+//draws half sphere
+//draws half sphere
+void drawsphere(float radius,int slices,int stacks)
+{
+	struct point points[100][100];
+	int i,j;
+	double h,r;
+	for(i=0;i<=stacks;i++)
+	{
+		h=radius*sin(((double)i/(double)stacks)*(pi/2));
+		r=sqrt(radius*radius-h*h);
+		for(j=0;j<=slices;j++)
+		{
+			points[i][j].x=r*cos(((double)j/(double)slices)*2*pi);
+			points[i][j].y=r*sin(((double)j/(double)slices)*2*pi);
+			points[i][j].z=h;
+		}
+
+	}
+	for(i=0;i<stacks;i++)
+	{
+		for(j=0;j<slices;j++)
+		{
+			glColor3f((double)i/(double)stacks,(double)i/(double)stacks,(double)i/(double)stacks);
+			glBegin(GL_QUADS);{
+				glVertex3f(points[i][j].x,points[i][j].y,points[i][j].z);
+				glVertex3f(points[i][j+1].x,points[i][j+1].y,points[i][j+1].z);
+				glVertex3f(points[i+1][j+1].x,points[i+1][j+1].y,points[i+1][j+1].z);
+				glVertex3f(points[i+1][j].x,points[i+1][j].y,points[i+1][j].z);
+
+			}glEnd();
+		}
+
+	}
+}
+
+void drawCylindar(float radius,int slices,int stacks)
+{
+	struct point points[100][100];
+	int i,j;
+	double h,r;
+	double factor=1;
+
+	for(i=0;i<=stacks;i++)
+	{
+		h=radius*sin(((double)i/(double)stacks)*(pi/2));
+		//r=sqrt(radius*radius-h*h);
+		r= radius*factor;
+		for(j=0;j<=slices;j++)
+		{
+			points[i][j].x=r*cos(((double)j/(double)slices)*2*pi);
+			points[i][j].y=r*sin(((double)j/(double)slices)*2*pi);
+			//points[i][j].y=radius;
+			points[i][j].z=h;
+		}
+       // factor-=.02;
+	}
+	for(i=0;i<stacks;i++)
+	{
+		for(j=0;j<slices;j++)
+		{
+			glColor3f((double)i/(double)stacks,(double)i/(double)stacks,(double)i/(double)stacks);
+			glBegin(GL_QUADS);{
+				glVertex3f(points[i][j].x,points[i][j].y,points[i][j].z);
+				glVertex3f(points[i][j+1].x,points[i][j+1].y,points[i][j+1].z);
+				glVertex3f(points[i+1][j+1].x,points[i+1][j+1].y,points[i+1][j+1].z);
+				glVertex3f(points[i+1][j].x,points[i+1][j].y,points[i+1][j].z);
+
+			}glEnd();
+		}
+
+	}
+}
+
+void keyboardListener(unsigned char key, int x,int y){
+	switch(key){
+
+		case '1':
+			drawgrid=1-drawgrid;
+			break;
+        case '2':
+            if(rotationanglea3<90)
+                rotationanglea3 += 1;
+            break;
+        case '3':
+            if(rotationanglea3>0)
+                rotationanglea3 -= 1;
+		default:
+			break;
+	}
+}
+
+
+void specialKeyListener(int key, int x,int y){
+	switch(key){
+		case GLUT_KEY_DOWN:		//down arrow key
+			cameraHeight -= 3.0;
+			break;
+		case GLUT_KEY_UP:		// up arrow key
+			cameraHeight += 3.0;
+			break;
+
+		case GLUT_KEY_RIGHT:
+			cameraAngle += 0.03;
+			break;
+		case GLUT_KEY_LEFT:
+			cameraAngle -= 0.03;
+			break;
+
+		case GLUT_KEY_PAGE_UP:
+		    if(rotationanglea1<45)
+		    rotationanglea1 += 1;
+			break;
+		case GLUT_KEY_PAGE_DOWN:
+		    if(rotationanglea1>-45)
+                rotationanglea1-=1;
+			break;
+
+		case GLUT_KEY_INSERT:
+		    if(rotationanglea2<90)
+		    rotationanglea2 += 1;
+			break;
+
+		case GLUT_KEY_HOME:
+		    if(rotationanglea2>00)
+                rotationanglea2-=1;
+			break;
+		case GLUT_KEY_END:
+			break;
+
+		default:
+			break;
+	}
+}
+
+
+void mouseListener(int button, int state, int x, int y){	//x, y is the x-y of the screen (2D)
+	switch(button){
+		case GLUT_LEFT_BUTTON:
+			if(state == GLUT_DOWN){		// 2 times?? in ONE click? -- solution is checking DOWN or UP
+				drawaxes=1-drawaxes;
+			}
+			break;
+
+		case GLUT_RIGHT_BUTTON:
+			//........
+			break;
+
+		case GLUT_MIDDLE_BUTTON:
+			//........
+			break;
+
+		default:
+			break;
+	}
+}
+
+
 
 void drawInnerCircle(float radius,float degree)
 {
@@ -380,11 +473,11 @@ void drawFish() {
     glBegin(GL_POLYGON);{
         glColor3f(1,1,1);
         glTexCoord2f(0,0); glVertex3f(mult*0, mult*0,mult*0);
-        glTexCoord2f(50,0); glVertex3f( mult*20,mult*0,mult*0);
-        glTexCoord2f(100,30); glVertex3f(mult*40,mult*40,mult*0);
-        glTexCoord2f(60,60); glVertex3f(mult*35,mult* 45,mult*0);
-        glTexCoord2f(30,100); glVertex3f(mult*28, mult*60,mult*0);
-        glTexCoord2f(0,90); glVertex3f(mult*0, mult*60,mult*0);
+		glTexCoord2f(50,0); glVertex3f( mult*20,mult*0,mult*0);
+		glTexCoord2f(100,30); glVertex3f(mult*40,mult*40,mult*0);
+		glTexCoord2f(60,60); glVertex3f(mult*35,mult* 45,mult*0);
+		glTexCoord2f(30,100); glVertex3f(mult*28, mult*60,mult*0);
+		glTexCoord2f(0,90); glVertex3f(mult*0, mult*60,mult*0);
     }glEnd();
     glDisable(GL_TEXTURE_2D);
 
@@ -394,8 +487,8 @@ void drawFish() {
     glNormal3f(1.0,0.0,0.0);
      glBegin(GL_POLYGON);{
         glTexCoord2f(0,0); glVertex3f(mult*28, mult*60,mult*0);
-        glTexCoord2f(100,0); glVertex3f( mult*20,mult*65,mult*0);
-        glTexCoord2f(0,100); glVertex3f(mult*17,mult*60,mult*0);
+		glTexCoord2f(100,0); glVertex3f( mult*20,mult*65,mult*0);
+		glTexCoord2f(0,100); glVertex3f(mult*17,mult*60,mult*0);
     }glEnd();
     glDisable(GL_TEXTURE_2D);
 
@@ -405,9 +498,9 @@ void drawFish() {
     glNormal3f(1.0,0.0,0.0);
     glBegin(GL_POLYGON);{
         glTexCoord2f(0,0); glVertex3f(mult*17, mult*60,mult*0);
-        glTexCoord2f(0,100); glVertex3f( mult*15,mult*62.5,mult*0);
-        glTexCoord2f(100,0); glVertex3f(mult*0,mult*62.5,mult*0);
-        glTexCoord2f(100,100); glVertex3f(mult*0,mult*60,mult*0);
+		glTexCoord2f(0,100); glVertex3f( mult*15,mult*62.5,mult*0);
+		glTexCoord2f(100,0); glVertex3f(mult*0,mult*62.5,mult*0);
+		glTexCoord2f(100,100); glVertex3f(mult*0,mult*60,mult*0);
     }glEnd();
     glDisable(GL_TEXTURE_2D);
 
@@ -416,9 +509,9 @@ void drawFish() {
     glNormal3f(1.0,0.0,0.0);
     glBegin(GL_POLYGON);{
         glTexCoord2f(0,0); glVertex3f(mult*15, mult*62.5,mult*0);
-        glTexCoord2f(0,100); glVertex3f( mult*25,mult*80,mult*0);
-        glTexCoord2f(100,100);glVertex3f( mult*0,mult*80,mult*0);
-        glTexCoord2f(100,0);glVertex3f( mult*0,mult*62.5,mult*0);
+		glTexCoord2f(0,100); glVertex3f( mult*25,mult*80,mult*0);
+		glTexCoord2f(100,100);glVertex3f( mult*0,mult*80,mult*0);
+		glTexCoord2f(100,0);glVertex3f( mult*0,mult*62.5,mult*0);
     }glEnd();
     glDisable(GL_TEXTURE_2D);
 
@@ -428,8 +521,8 @@ void drawFish() {
     glNormal3f(1.0,0.0,0.0);
     glBegin(GL_TRIANGLES);{
         glTexCoord2f(0,0);glVertex3f(mult*25, mult*80,mult*0);
-        glTexCoord2f(100,0);glVertex3f( mult*20,mult*82.5,mult*0);
-        glTexCoord2f(0,100);glVertex3f(mult*20,mult*80,mult*0);
+		glTexCoord2f(100,0);glVertex3f( mult*20,mult*82.5,mult*0);
+		glTexCoord2f(0,100);glVertex3f(mult*20,mult*80,mult*0);
 
     }glEnd();
     glDisable(GL_TEXTURE_2D);
@@ -439,9 +532,9 @@ void drawFish() {
     glNormal3f(1.0,0.0,0.0);
     glBegin(GL_POLYGON);{
         glTexCoord2f(0,0); glVertex3f(mult*20, mult*80,mult*0);
-        glTexCoord2f(0,100);glVertex3f( mult*20,mult*82.5,mult*0);
-        glTexCoord2f(100,0);glVertex3f(mult*15,mult*84.5,mult*0);
-        glTexCoord2f(100,100);glVertex3f(mult*15,mult*80,mult*0);
+		glTexCoord2f(0,100);glVertex3f( mult*20,mult*82.5,mult*0);
+		glTexCoord2f(100,0);glVertex3f(mult*15,mult*84.5,mult*0);
+		glTexCoord2f(100,100);glVertex3f(mult*15,mult*80,mult*0);
 
     }glEnd();
     glDisable(GL_TEXTURE_2D);
@@ -451,9 +544,9 @@ void drawFish() {
     glNormal3f(1.0,0.0,0.0);
     glBegin(GL_POLYGON);{
         glTexCoord2f(0,0); glVertex3f(mult*15, mult*80,mult*0);
-        glTexCoord2f(100,0);glVertex3f( mult*15,mult*84.5,mult*0);
-        glTexCoord2f(100,100);glVertex3f(mult*10,mult*86,mult*0);
-        glTexCoord2f(0,100);glVertex3f(mult*10,mult*80,mult*0);
+		glTexCoord2f(100,0);glVertex3f( mult*15,mult*84.5,mult*0);
+		glTexCoord2f(100,100);glVertex3f(mult*10,mult*86,mult*0);
+		glTexCoord2f(0,100);glVertex3f(mult*10,mult*80,mult*0);
 
     }glEnd();
     glDisable(GL_TEXTURE_2D);
@@ -463,9 +556,9 @@ void drawFish() {
     glNormal3f(1.0,0.0,0.0);
     glBegin(GL_POLYGON);{
         glTexCoord2f(0,0); glVertex3f(mult*10, mult*80,mult*0);
-        glTexCoord2f(100,0);glVertex3f( mult*10,mult*86,mult*0);
-        glTexCoord2f(100,100);glVertex3f(mult*5,mult*87,mult*0);
-        glTexCoord2f(0,100);glVertex3f(mult*5,mult*80,mult*0);
+		glTexCoord2f(100,0);glVertex3f( mult*10,mult*86,mult*0);
+		glTexCoord2f(100,100);glVertex3f(mult*5,mult*87,mult*0);
+		glTexCoord2f(0,100);glVertex3f(mult*5,mult*80,mult*0);
 
     }glEnd();
     glDisable(GL_TEXTURE_2D);
@@ -475,9 +568,9 @@ void drawFish() {
     glNormal3f(1.0,0.0,0.0);
     glBegin(GL_POLYGON);{
         glTexCoord2f(0,0); glVertex3f(mult*5, mult*80,mult*0);
-        glTexCoord2f(0,100);glVertex3f( mult*5,mult*87,mult*0);
-        glTexCoord2f(100,100);glVertex3f(mult*0,mult*87,mult*0);
-        glTexCoord2f(100,0);glVertex3f(mult*0,mult*80,mult*0);
+		glTexCoord2f(0,100);glVertex3f( mult*5,mult*87,mult*0);
+		glTexCoord2f(100,100);glVertex3f(mult*0,mult*87,mult*0);
+		glTexCoord2f(100,0);glVertex3f(mult*0,mult*80,mult*0);
 
     }glEnd();
     glDisable(GL_TEXTURE_2D);
@@ -1122,8 +1215,8 @@ void drawPiller()
                 glVertex3f(-1.2,43.8,0.5+160+45+67+90);
                 glVertex3f(-.6,43,0.5+160+45+67+90);
             }glEnd();
-        }
-        glPopMatrix();
+	    }
+	    glPopMatrix();
 
 }
 
@@ -1131,11 +1224,11 @@ void drawPiller()
 void drawBase()
 {
     glPushMatrix();
-    {
+	{
 
 
         //outer half circle
-        glPushMatrix();{
+	    glPushMatrix();{
 
             glBegin(GL_POLYGON);{
                 glColor3f(.5,.5,.5);
@@ -1147,7 +1240,7 @@ void drawBase()
             }
             glEnd();
 
-            glBegin(GL_POLYGON);{
+	        glBegin(GL_POLYGON);{
                 glColor3f(.5,.5,.5);
                 glVertex3f(50,24,-13);
                 glVertex3f(60,27,-13);
@@ -1169,43 +1262,43 @@ void drawBase()
             }
             glEnd();
 
-            glColor3f(.5,.5,.5);
-            glTranslatef(0,0,-13);
-            glTranslatef(0,25,0);
+	        glColor3f(.5,.5,.5);
+	        glTranslatef(0,0,-13);
+	        glTranslatef(0,25,0);
             glRotatef(150,0,0,1);
             drawOuterCircle(50,210);
 
         }glPopMatrix();
 
         //inner half circle
-        glPushMatrix();{
-            glColor3f(.5,.5,.5);
-            glTranslatef(0,0,-10);
-            glTranslatef(3,30,0);
+	    glPushMatrix();{
+	        glColor3f(.5,.5,.5);
+	        glTranslatef(0,0,-10);
+	        glTranslatef(3,30,0);
             glRotatef(180,0,0,1);
 
             drawInnerCircle(43,185);
         }glPopMatrix();
 
         glPushMatrix();{
-            glColor3f(.5,.5,.5);
-            glBegin(GL_POLYGON);{
+	        glColor3f(.5,.5,.5);
+	        glBegin(GL_POLYGON);{
                 glVertex3f(39.64,27,-10);
                 glVertex3f(39.64,27,-13);
                 glVertex3f(45,88,-13);
                 glVertex3f(45,88,-10);
 
-            }glEnd();
-            glBegin(GL_POLYGON);{
+	        }glEnd();
+	        glBegin(GL_POLYGON);{
                 glVertex3f(39.64,27,-10);
                 //glVertex3f(39.64,27,-13);
                 //glVertex3f(50,88,-13);
                 glVertex3f(45,88,-10);
                 glVertex3f(0,50,-10);
 
-            }glEnd();
-//          glTranslatef(0,0,-10);
-//          glTranslatef(3,30,0);
+	        }glEnd();
+//	        glTranslatef(0,0,-10);
+//	        glTranslatef(3,30,0);
 //            glRotatef(180,0,0,1);
 
             //drawInnerCircle(43,185);
@@ -1224,9 +1317,9 @@ void drawBase()
             glRotatef(180,0,1,0);
             drawFish();
         }glPopMatrix();
-        //main part drawing here
-    }
-    glPopMatrix();
+	    //main part drawing here
+	}
+	glPopMatrix();
 }
 
 
@@ -1323,7 +1416,7 @@ void drawrailings(){
         //circular railing
         glPushMatrix();{
             glTranslatef(0,0,-17);
-            glTranslatef(3,30,0);
+	        glTranslatef(3,30,0);
             glRotatef(180,0,0,1);
             for(int i=10;i<185;i+=10)
             {
@@ -1349,7 +1442,7 @@ void drawrailings(){
         //circular top starts here
         glPushMatrix();{
             glTranslatef(0,0,-2);
-            glTranslatef(0,25,0);
+	        glTranslatef(0,25,0);
             glRotatef(170,0,0,1);
             for(int i=10;i<210;i+=10)
             {
@@ -1536,4 +1629,228 @@ void loadBaseImage()
     }
     glPopMatrix();
 }
-#endif
+
+void display(){
+
+	//clear the display
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glClearColor(0,0,0,0);	//color black
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	/********************
+	/ set-up camera here
+	********************/
+	//load the correct matrix -- MODEL-VIEW matrix
+	glMatrixMode(GL_MODELVIEW);
+
+	//initialize the matrix
+	glLoadIdentity();
+
+	//now give three info
+	//1. where is the camera (viewer)?
+	//2. where is the camera looking?
+	//3. Which direction is the camera's UP direction?
+
+	//gluLookAt(100,100,100,	0,0,0,	0,0,1);
+	gluLookAt(100*cos(cameraAngle), 100*sin(cameraAngle), cameraHeight,		0,0,0,		0,0,1);
+	//gluLookAt(0,-1,150,	0,0,0,	0,0,1);
+
+
+	//again select MODEL-VIEW
+	glMatrixMode(GL_MODELVIEW);
+
+
+	/****************************
+	/ Add your objects from here
+	****************************/
+	//add objects
+
+
+//mainfile
+	drawAxes();
+	drawGrid();
+    drawBase();
+    drawPiller();
+    drawFinalJoints(70);
+    drawFinalJoints(100);
+    drawFinalJoints(130);
+    drawFinalJoints(160);
+    drawrailings();
+    loadBaseImage();
+//main
+
+
+
+
+/*
+    glPushMatrix();{
+        glRotatef(rotationanglea3,0,1,0);
+	    glRotatef(rotationanglea1,1,0,0);
+        glColor3f(0,1,0);
+
+        glPushMatrix();{
+            glTranslatef(0,0,-40);
+            glRotatef(rotationanglea2,1,0,0);
+            glTranslatef(0,0,-20);
+            glRotatef(90,1,0,0);
+            drawSquare(20);
+            glColor3f(1,0,0);
+        }
+        glPopMatrix();
+        glTranslatef(0,0,-20);
+        glRotatef(90,1,0,0);
+        drawSquare(20);
+    }
+    glPopMatrix();
+
+*/
+//attempt 2
+/*
+glPushMatrix();{
+        glRotatef(rotationanglea3,0,1,0);
+	    glRotatef(rotationanglea1,1,0,0);
+        glTranslatef(0,0,-20);
+        glRotatef(90,1,0,0);
+        drawSquare(20);
+        glColor3f(0,1,0);
+}
+glPopMatrix();
+
+glPushMatrix();{
+    glRotatef(rotationanglea3,0,1,0);
+    glRotatef(rotationanglea1,1,0,0);
+    glTranslatef(0,0,-40);
+    glRotatef(rotationanglea2,1,0,0);
+    glTranslatef(0,0,-20);
+    glRotatef(90,1,0,0);
+    drawSquare(20);
+    glColor3f(1,0,0);
+}
+glPopMatrix();
+*/
+	//ADD this line in the end --- if you use double buffer (i.e. GL_DOUBLE)
+	glutSwapBuffers();
+}
+
+void animate(){
+	angle+=0.05;
+	//codes for any changes in Models, Camera
+	glutPostRedisplay();
+}
+
+int num_texture = -1;
+int LoadBitmap(char *filename)
+{
+    int i, j=0;
+    FILE *l_file;
+    unsigned char *l_texture;
+
+    BITMAPFILEHEADER fileheader;
+    BITMAPINFOHEADER infoheader;
+    RGBTRIPLE rgb;
+
+    num_texture++;
+
+    if( (l_file = fopen(filename, "rb"))==NULL) return (-1);
+
+    fread(&fileheader, sizeof(fileheader), 1, l_file);
+
+    fseek(l_file, sizeof(fileheader), SEEK_SET);
+    fread(&infoheader, sizeof(infoheader), 1, l_file);
+
+    l_texture = (byte *) malloc(infoheader.biWidth * infoheader.biHeight * 4);
+    memset(l_texture, 0, infoheader.biWidth * infoheader.biHeight * 4);
+for (i=0; i < infoheader.biWidth*infoheader.biHeight; i++)
+    {
+            fread(&rgb, sizeof(rgb), 1, l_file);
+
+            l_texture[j+0] = rgb.rgbtRed;
+            l_texture[j+1] = rgb.rgbtGreen;
+            l_texture[j+2] = rgb.rgbtBlue;
+            l_texture[j+3] = 255;
+            j += 4;
+    }
+    fclose(l_file);
+
+    glBindTexture(GL_TEXTURE_2D, num_texture);
+
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
+
+// glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+    glTexImage2D(GL_TEXTURE_2D, 0, 4, infoheader.biWidth, infoheader.biHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, l_texture);
+     gluBuild2DMipmaps(GL_TEXTURE_2D, 4, infoheader.biWidth, infoheader.biHeight, GL_RGBA, GL_UNSIGNED_BYTE, l_texture);
+
+    free(l_texture);
+
+    return (num_texture);
+
+}
+
+
+void init(){
+	//codes for initialization
+
+	IQuadric = gluNewQuadric();
+	fishup = LoadBitmap("Spinnaker_Tower.bmp");
+	innerCircle = LoadBitmap("Fencing_Weathered.bmp");
+	outerCircle = LoadBitmap("Concrete.bmp");
+	frontPlate = LoadBitmap("upperside2reverse.bmp");
+	door = LoadBitmap("upperside3reverse.bmp");
+	backPlate = LoadBitmap("upperside1reverse.bmp");
+	base = LoadBitmap("base.bmp");
+//    innerCircle = LoadBitmap("Fencing_Weathered.bmp");
+//    outerCircle = LoadBitmap("Concrete.bmp");
+
+	drawgrid=0;
+	drawaxes=1;
+	cameraHeight=100.0;
+	cameraAngle=1.0;
+	angle=0;
+   // load
+	//clear the screen
+	glClearColor(0,0,0,0);
+
+	/************************
+	/ set-up projection here
+	************************/
+	//load the PROJECTION matrix
+	glMatrixMode(GL_PROJECTION);
+
+	//initialize the matrix
+	glLoadIdentity();
+
+	//give PERSPECTIVE parameters
+	gluPerspective(80,	1,	1,	10000.0);
+	//field of view in the Y (vertically)
+	//aspect ratio that determines the field of view in the X direction (horizontally)
+	//near distance
+	//far distance
+}
+
+int main(int argc, char **argv){
+	glutInit(&argc,argv);
+	glutInitWindowSize(500, 500);
+	glutInitWindowPosition(0, 0);
+	glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGB);	//Depth, Double buffer, RGB color
+
+	glutCreateWindow("My OpenGL Program");
+
+	init();
+
+	glEnable(GL_DEPTH_TEST);	//enable Depth Testing
+
+	glutDisplayFunc(display);	//display callback function
+	glutIdleFunc(animate);		//what you want to do in the idle time (when no drawing is occuring)
+
+	glutKeyboardFunc(keyboardListener);
+	glutSpecialFunc(specialKeyListener);
+	glutMouseFunc(mouseListener);
+
+	glutMainLoop();		//The main loop of OpenGL
+
+	return 0;
+}
