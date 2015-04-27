@@ -171,7 +171,6 @@ void drawCircle(float radius,float degree)
                 glVertex3f(cos(degInRad1)*radius,sin(degInRad1)*radius,-3);
                 }glEnd();
             }
-            printf("%f, %f\n",cos(degInRad1)*radius,sin(degInRad1)*radius);
        }
        glPopMatrix();
    }glPopMatrix();

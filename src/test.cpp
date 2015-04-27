@@ -21,7 +21,7 @@ const double delta = 5;
 const double delAlpha = .05;
 const double pi = acos(-1.0);
 
-Camera cam(Vector(300, 0, 150), Vector(0, 0, 150), Vector(0, 0, 1));
+Camera cam(Vector(10, 0, 400), Vector(0, 0, 0), Vector(0, 0, 1));
 
 #include "includes/listeners.h"
 #include "includes/dip.h"
@@ -65,7 +65,7 @@ void debugPoints(Vector points[8]) {
 	}
 }
 
-void drawCircularPiller(Vector center, double radius, double width, double thickness, int sections, int from, int to, Color c) {
+void drawCircularPiller(Vector center, double radius, double width, double thickness, int sections, int from, int to, Color c, Vector ret[8], int draw) {
 	double del = 2*acos(-1.0)/sections;
 	for (int i = from; i <= to; i++) {
 		double alpha = i*del;
@@ -73,24 +73,83 @@ void drawCircularPiller(Vector center, double radius, double width, double thick
 		Vector points[8];
 		getPoints(center, radius, alpha,  width, thickness, points);
 		getPoints(center, radius, beta, width, thickness, points+4);
-		drawOpenBox(points, c);
+		for (int j = 0; j < 4 && draw == 0; j++) {
+			if (i == from) {
+				ret[j] = points[j];
+			} else if (i == to) {
+				ret[j+4] = points[j+4];
+				//cout << "***** OK *****" << endl;
+			}
+		}
+		if (draw) {
+			drawOpenBox(points, c);
+		}
 	}
 }
 
-void drawTriangularConnector() {
-	Vector a(17, 60, -10);
-	Vector b(15, 62.5, -10);
-	Vector u = Vector(3, 5, 0);
+Vector drawTriangularConnector(int draw, int o) {
+	Vector a(o*17, 60, -10);
+	Vector b(o*15, 62.5, -10);
+	Vector u = Vector(o*3, 5, 0);
 	u.normalize();
 	Vector c = b + (u*26);
 	Vector d = a + (u*26);
-	double z1 = 60, z2 = 10;
-	Vector f(0, 53, z1);
-	Vector e = f+Vector(2, -2.5, 0);
+	double z1 = 100, z2 = 10;
+	u = Vector(-o*3, -5, 0);
+	u.normalize();
+	Vector e = a + (u*45) + Vector(0, 0, z1);
+	Vector f = b + (u*45) + Vector(0, 0, z1);
 	Vector g = f+Vector(0, 0, z2);
 	Vector h = e+Vector(0, 0, z2);
 	Vector points[8] = {a, b, c, d, e, f, g, h};
-	drawOpenBox(points, Color(WHITE));
+	if (draw) {
+		drawOpenBox(points, Color(WHITE));
+	}
+	return e;
+}
+
+void drawUpperConnector(Vector *ret, int draw, int o) {
+	Vector points[8];
+	for (int i = 0; i < 4; i++){
+		points[i] = ret[i];
+	}
+	double d = sqrt(10.25)/2*cos(atan(4/3.0));
+	Vector u(-o*10, 35), v(0, 35), w(-o*16, 43);
+	Vector p = v-u, q = w-u;
+	p.normalize();
+	q.normalize();
+	points[7] = u + (p*d) + Vector(0, 0, 227.5 + 25); 
+	points[6] = v + (p*d) + Vector(0, 0, 227.5 + 25);
+	u = Vector(-o*5, 35), v = Vector(0, 35), w = Vector(-o*11, 43);
+	p = v-u, q = w-u;
+	p.normalize();
+	q.normalize();
+	points[4] = u + (p*d) + Vector(0, 0, 227.5+45);
+	points[5] = v + (p*d) + Vector(0, 0, 227.5+45);
+	if (draw) {
+		drawOpenBox(points, Color(WHITE));
+	}
+}
+
+void drawCurve(int o) {
+	Vector points[8];
+	drawCircularPiller(Vector(0, 0, 0), 140, 5, o*3.2, 64, -6, 4, Color(1, 0, 0), points, 0);
+	Vector r = drawTriangularConnector(0, o);
+	for (int i = 0; i < 8; i++) {
+		points[i].rotate(pi-o*atan(4.0/3), Vector(0, 0, 1));
+	}
+	Vector t = r - points[0];
+	glPushMatrix(); {
+		glTranslatef(POINT(t));
+		glRotatef(pi/DEG2RAD-o*atan(4.0/3)/DEG2RAD, 0, 0, 1);
+		drawCircularPiller(Vector(0, 0, 0), 140, 5, o*3.2, 64, -6, 4, Color(1, 0, 0), points, 1);
+	} glPopMatrix();
+	drawTriangularConnector(1, o);
+	for (int i = 0; i < 8; i++) {
+		points[i] = points[i] + t;
+	}
+	drawUpperConnector(points+4, 1, o);
+
 }
 
 void display() {
@@ -117,15 +176,8 @@ void display() {
 	drawGrid();
     drawBase();
     drawPiller();
-	glPushMatrix(); {
-		glRotatef(pi/DEG2RAD, 0, 0, 1);
-		glRotatef(1.03/DEG2RAD, 0, 0, 1);
-		glTranslatef(0, -140, 160);
-		double val = 2;
-		glTranslatef(-50/val, 30/val, 0);
-		drawCircularPiller(Vector(0, 0, 0), 160, 5, 3.2, 64, -10, 6, Color(1, 0, 0));
-	} glPopMatrix();
-	drawTriangularConnector();
+	drawCurve(-1);
+	drawCurve(1);
 	//rotate this rectangle around the Z axis	
 	glFlush();
 	//////// ------ NOTE ---- ORDER matters. compare last two spheres!
